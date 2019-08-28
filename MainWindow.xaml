@@ -1,0 +1,277 @@
+﻿<Window x:Class="Tetris.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Tetris"
+        xmlns:view="clr-namespace:Tetris.View"
+        mc:Ignorable="d"
+        WindowStyle="None" ResizeMode="NoResize"
+        AllowsTransparency="True" Icon="Resource/Tetris.ico"
+        Title="MainWindow" Height="660" Width="600"
+        WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <LinearGradientBrush x:Key="TitleBarBrush" StartPoint="0, 0" EndPoint="0, 1">
+            <GradientStop Color="#202020" Offset="0.4"/>
+            <GradientStop Color="#303030" Offset="1"/>
+        </LinearGradientBrush>
+        <DropShadowEffect x:Key="WhiteGlow" BlurRadius="8" ShadowDepth="0" Color="#A0FFFFFF"/>
+
+        <Style x:Key="DefaultButtonStyle" TargetType="Button">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="#A0A0A0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="#C0C0C0"/>
+                    <Setter Property="Background" Value="#40FFFFFF"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                    <Setter Property="Background" Value="#80FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="#303030">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="610"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="310"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        
+        <!-- Window Basic Functions -->
+        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Background="{StaticResource TitleBarBrush}">
+            <Button HorizontalAlignment="Left" Margin="5" Padding="0" Width="60" Focusable="False"
+                    Style="{StaticResource DefaultButtonStyle}" Click="BtnInfoClick">
+                <Image Source="pack://application:,,,/Resource/TetrisIcon.png" Height="24" Width="24" Effect="{StaticResource WhiteGlow}"/>
+            </Button>
+            <Label x:Name="TitleText" Margin="4" Padding="0"
+                   HorizontalAlignment="Center" VerticalContentAlignment="Center"
+                   Content="Tetris" FontSize="32" FontFamily="Consolas" Foreground="#B0B0B0" FontWeight="Bold"/>
+            <Button HorizontalAlignment="Right" Margin="5" Padding="0" Width="60" Focusable="False"
+                    Style="{StaticResource DefaultButtonStyle}" Click="BtnCloseClick"
+                    Content="r" FontSize="24" FontFamily="Webdings"/>
+            <Button HorizontalAlignment="Right" Margin="70, 5" Padding="0" Width="60" Focusable="False"
+                    Style="{StaticResource DefaultButtonStyle}" Click="BtnMinimizeClick"
+                    Content="0" FontSize="24" FontFamily="Webdings"/>
+            <Rectangle Margin="70, 0, 130, 0" Fill="Transparent" MouseLeftButtonDown="TitleBarPressed"/>
+        </Grid>
+        
+        <!-- Gaming Area -->
+        <Rectangle Grid.Column="1" Grid.Row="1" Fill="#101010"/>
+        <WrapPanel x:Name="Wall" Grid.Column="1" Grid.Row="1" Background="#202020" Margin="5"/>
+
+        <!-- Left Info Box -->
+        <Grid Grid.Column="0" Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="150"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="100"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <!-- Held BlockSet -->
+            <Rectangle Grid.Row="0" Margin="10, 5" Fill="#282828"/>
+            <view:BlockSetViewer x:Name="HoldViewer" Length="100"/>
+            
+            <!-- Difficulty Info -->
+            <Rectangle Grid.Row="1" Margin="10, 5" Fill="#282828"/>
+            <Label x:Name="DifficultyLabel" Grid.Row="1"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                   Content="" FontSize="24" FontFamily="Consolas" Foreground="#BBBBBB"/>
+
+            <!-- Speed Info -->
+            <Rectangle Grid.Row="2" Margin="10, 5" Fill="#282828"/>
+            <Label Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"
+                   Content="Speed:" FontSize="24" FontFamily="Consolas" Foreground="#A0A0A0"/>
+            <Label x:Name="LevelLabel" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="18, 0"
+                   Content="" FontSize="48" FontFamily="Consolas" Foreground="#FFFFFF"/>
+            <ProgressBar x:Name="LevelupProgressBar" Grid.Row="2" VerticalAlignment="Bottom" Margin="10,0" Height="10"
+                         Foreground="Aqua" Background="#080808" BorderThickness="0"/>
+
+            <!-- Score Info -->
+            <Rectangle Grid.Row="3" Margin="10, 5" Fill="#282828"/>
+            <Label Grid.Row="3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"
+                   Content="Score:" FontSize="24" FontFamily="Consolas" Foreground="#A0A0A0"/>
+            <Label x:Name="ScoreLabel" Grid.Row="3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="18, 0"
+                   Content="" FontSize="32" FontFamily="Consolas" Foreground="#FFFFFF"/>
+        </Grid>
+
+        <!-- Up coming BlockSets -->
+        <StackPanel x:Name="QueueViewer" Grid.Column="2" Grid.Row="1" Margin="10" Background="#282828"/>
+
+        <!-- Game Mechanic Testing -->
+        <!--
+        <Grid Grid.Column="0" Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Style="{StaticResource DefaultButtonStyle}" Click="BtnPlay"
+                Content="." FontSize="20" FontFamily="Webdings" Foreground="#A0A0A0"/>
+            <Button Grid.Column="1" Style="{StaticResource DefaultButtonStyle}" Click="BtnReset"
+                Content="q" FontSize="20" FontFamily="Webdings" Foreground="#A0A0A0"/>
+        </Grid>
+
+        <Grid Grid.Column="1" Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Style="{StaticResource DefaultButtonStyle}" Click="BtnLeft"
+                Content="7" FontSize="20" FontFamily="Webdings" Foreground="#A0A0A0"/>
+            <Button Grid.Column="1" Style="{StaticResource DefaultButtonStyle}" Click="BtnRotateLeft"
+                Content="Q" FontSize="20" FontFamily="Wingdings 3" Foreground="#A0A0A0"/>
+            <Button Grid.Column="2" Style="{StaticResource DefaultButtonStyle}" Click="BtnForceFall"
+                Content="6" FontSize="20" FontFamily="Webdings" Foreground="#A0A0A0"/>
+            <Button Grid.Column="3" Style="{StaticResource DefaultButtonStyle}" Click="BtnRotateRight"
+                Content="P" FontSize="20" FontFamily="Wingdings 3" Foreground="#A0A0A0"/>
+            <Button Grid.Column="4" Style="{StaticResource DefaultButtonStyle}" Click="BtnRight"
+                Content="8" FontSize="20" FontFamily="Webdings" Foreground="#A0A0A0"/>
+        </Grid>
+
+        <Grid Grid.Column="2" Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Style="{StaticResource DefaultButtonStyle}" Click="BtnFallToBottom"
+                Content="," FontSize="20" FontFamily="Wingdings 3" Foreground="#A0A0A0"/>
+            <Button Grid.Column="1" Style="{StaticResource DefaultButtonStyle}" Click="BtnHold"
+                Content="R" FontSize="20" FontFamily="Wingdings 3" Foreground="#A0A0A0"/>
+        </Grid>
+        -->
+
+        <!-- Help -->
+        <Grid x:Name="HelpBoard" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Grid.RowSpan="2" Background="#303030" Visibility="Hidden">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="550"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Image Source="pack://application:,,,/Resource/Help500.jpg" Height="500" Width="500"/>
+            <Label Grid.Row="1" HorizontalContentAlignment="Center" VerticalAlignment="Top"
+                   Content="Press any key to continue..." FontSize="24" FontFamily="Consolas" Foreground="#A0A0A0"/>
+            <Label Grid.Row="1" HorizontalContentAlignment="Center" VerticalAlignment="Bottom"
+                   Content="Or press ESC to exit" FontSize="18" FontFamily="Consolas" Foreground="#A0A0A0"/>
+        </Grid>
+
+        <!-- Choose Difficulty -->
+        <Grid x:Name="DifficultyBoard" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Grid.RowSpan="2" Background="#303030" Visibility="Hidden">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Column="0" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="40"
+                   Content="J" FontSize="128" FontFamily="Wingdings" Foreground="GreenYellow"/>
+            <Label Grid.Column="0" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                   Content="Easy" FontSize="48" FontFamily="Consolas" Foreground="GreenYellow"/>
+            <Image Grid.Column="0" Grid.Row="1" VerticalAlignment="Top" Margin="40, 20"
+                   Source="pack://application:,,,/Resource/ButtonLeft.png"/>
+
+            <Label Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="40"
+                   Content="K" FontSize="128" FontFamily="Wingdings" Foreground="Yellow"/>
+            <Label Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                   Content="Normal" FontSize="48" FontFamily="Consolas" Foreground="Yellow"/>
+            <Image Grid.Column="1" Grid.Row="1" VerticalAlignment="Top" Margin="40, 20"
+                   Source="pack://application:,,,/Resource/ButtonDown.png"/>
+
+            <Label Grid.Column="2" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="40"
+                   Content="L" FontSize="128" FontFamily="Wingdings" Foreground="Orange"/>
+            <Label Grid.Column="2" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                   Content="Hard" FontSize="48" FontFamily="Consolas" Foreground="Orange"/>
+            <Image Grid.Column="2" Grid.Row="1" VerticalAlignment="Top" Margin="40, 20"
+                   Source="pack://application:,,,/Resource/ButtonRight.png"/>
+        </Grid>
+
+        <!-- Ready -->
+        <Grid x:Name="ReadyBoard" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Background="Black" Margin="20" Height="120" Visibility="Hidden">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Grid.RowSpan="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                   Content="Press any key to start" FontSize="32" FontFamily="Consolas" Foreground="#A0A0A0"/>
+            <Label Grid.Row="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                   Content="Or press ESC to exit" FontSize="18" FontFamily="Consolas" Foreground="#A0A0A0"/>
+        </Grid>
+
+        <!-- Pause Board -->
+        <Grid x:Name="PauseBoard" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Background="#80000000" Visibility="Hidden">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                   Content="PAUSE" FontSize="72" FontFamily="Consolas" Foreground="White"/>
+            <Label Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                   Content="Press any key to continue" FontSize="24" FontFamily="Consolas" Foreground="#A0A0A0"/>
+            <Label Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="40"
+                   HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                   Content="Or press ESC to exit" FontSize="18" FontFamily="Consolas" Foreground="#A0A0A0"/>
+        </Grid>
+
+        <!-- Result -->
+        <Grid x:Name="ResultBoard" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Grid.RowSpan="2" Background="#C0000000" Visibility="Hidden">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="270"/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                   Content="Game Over" FontSize="72" FontFamily="Consolas" Foreground="White"/>
+            <StackPanel Grid.Row="2" >
+                <Label HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                   Content="Your Score :" FontSize="32" FontFamily="Consolas" Foreground="#A0A0A0"/>
+                <Label x:Name="ResultScore" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                   Content="0" FontSize="48" FontFamily="Consolas" Foreground="#CCCCCC"/>
+                <Label HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="0, 10, 0, 0"
+                   Content="Total Clear Rows:" FontSize="24" FontFamily="Consolas" Foreground="#A0A0A0"/>
+                <Label x:Name="ResultClearRows" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                   Content="0" FontSize="32" FontFamily="Consolas" Foreground="#CCCCCC"/>
+            </StackPanel>
+            <Label Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                   Content="Press any key to start a new game" FontSize="24" FontFamily="Consolas" Foreground="#A0A0A0"/>
+            <Label Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Top"
+                   HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                   Content="Or press ESC to exit" FontSize="24" FontFamily="Consolas" Foreground="#808080"/>
+        </Grid>
+        
+    </Grid>
+</Window>
