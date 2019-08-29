@@ -172,5 +172,8 @@
   <ItemGroup>
     <Resource Include="Resource\TetrisIcon.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\Snapshot.PNG" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
