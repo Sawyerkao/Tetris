@@ -10,9 +10,9 @@ Wish I can do better next time :)
 # Scoring
 You will get more point if clear more rows in a step.  
 Also, total number of cleared rows in a game will increase point you get while clear rows.  
-Force blocks down  1 tile will get 1 point. Fall to bottom immediately will get 2 point per tile.
-More difficult more point, of course.  
+Force blocks down  1 tile will get 1 point. Fall to bottom immediately will get 2 point per tile.  
+More difficult more point, of course.
 # Read More...
 If you find bugs, tell me please. I will try to handle it.  
 If you can give me some suggestion, I would be appreciate.  
-Hope you guys enjoy this.
+Hope you guys enjoy this :)
